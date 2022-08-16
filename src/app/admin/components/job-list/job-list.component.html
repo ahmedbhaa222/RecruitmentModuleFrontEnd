@@ -1,0 +1,251 @@
+<p-toast></p-toast>
+
+<div class="card">
+  <p-table
+    #dt
+    [value]="jobs"
+    [rows]="3"
+    [totalRecords]="pagingData?.totalRecords"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[3, 9, 15, 20, 50, 100]"
+    [loading]="loading"
+    [paginator]="true"
+    [lazy]="true"
+    [lazyLoadOnInit]="false"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    (onLazyLoad)="getData($event)"
+    (onPage)="getData($event)"
+  >
+    <ng-template pTemplate="caption">
+      <div class="flex align-items-center justify-content-between">
+        <h5 class="m-0">Jobs List</h5>
+
+        <p-toolbar styleClass="mb-4">
+          <ng-template pTemplate="left">
+            <span class="p-input-icon-left">
+              <i class="pi pi-search"></i>
+              <input
+                pInputText
+                type="text"
+                [(ngModel)]="jobText"
+                placeholder="Search Job Name..."
+              />
+              <button
+                style="margin-left: 20px"
+                (click)="search($event)"
+                pButton
+                pRipple
+                label="search"
+                icon="pi pi-search"
+              ></button>
+            </span>
+          </ng-template>
+
+          <ng-template pTemplate="right">
+            <button
+              pButton
+              pRipple
+              label="New"
+              icon="pi pi-plus"
+              class="p-button-success mr-2"
+              (click)="openNew()"
+            ></button>
+          </ng-template>
+        </p-toolbar>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Maximum Applications</th>
+        <th>Valid From</th>
+        <th>Valid To</th>
+        <th></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-job>
+      <tr>
+        <td>
+          {{ job.name }}
+        </td>
+        <td>
+          {{ job.categoryName }}
+        </td>
+        <td>
+          {{ job.maximumApplications }}
+        </td>
+        <td>
+          {{ job.validFrom | date }}
+        </td>
+        <td>
+          {{ job.validTo | date }}
+        </td>
+        <td>
+          <button
+            pButton
+            pRipple
+            icon="pi pi-pencil"
+            class="p-button-rounded p-button-success mr-2"
+            (click)="editJob(job.id)"
+          ></button>
+          <button
+            pButton
+            pRipple
+            icon="pi pi-trash"
+            style="margin-left: 5px"
+            class="p-button-rounded p-button-warning"
+            (click)="deleteJob(job.id)"
+          ></button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage" >
+       <td style="text-align: center;" colspan='6'>
+        No Jobs Found  :(
+       </td>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [(visible)]="jobDialog"
+  [style]="{ width: '1000px' }"
+  header="Job Details"
+  [modal]="true"
+  styleClass="p-fluid"
+>
+  <ng-template pTemplate="content">
+    <div class="field">
+      <label for="name">Name</label>
+      <input
+        type="text"
+        pInputText
+        id="name"
+        [(ngModel)]="job.name"
+        required
+        autofocus
+      />
+      <small class="p-error" *ngIf="submitted && !job.name"
+        >Name is required.</small
+      >
+    </div>
+    <div class="field">
+      <label for="category">category</label>
+      <p-dropdown
+        [options]="categories"
+        [(ngModel)]="job.category"
+        optionLabel="name"
+      ></p-dropdown>
+      <small class="p-error" *ngIf="submitted && !job.category"
+        >Category is required.</small
+      >
+    </div>
+    <div class="field">
+      <label for="maximumApplications">Maximum Applications</label>
+      <p-inputNumber
+        [min]="1"
+        id="maximumApplications"
+        [(ngModel)]="job.maximumApplications"
+        autofocus
+      ></p-inputNumber>
+
+      <small
+        class="p-error"
+        *ngIf="
+          submitted && (!job.maximumApplications || job.maximumApplications < 1)
+        "
+        >MaximumApplications is required And Must Be More Than 0.</small
+      >
+    </div>
+    <div class="field">
+      <label for="description">Description</label>
+      <textarea
+        id="description"
+        pInputTextarea
+        [(ngModel)]="job.description"
+        required
+        rows="3"
+        cols="20"
+      ></textarea>
+      <small class="p-error" *ngIf="submitted && !job.description"
+        >Description is required.</small
+      >
+    </div>
+    <div class="field">
+      <label for="skills">skills</label>
+      <br />
+      <small> You Can Have Multiple Skills Seprated By Comma ","</small>
+      <p-chips [(ngModel)]="job.skills" separator=","></p-chips>
+      <small
+        class="p-error"
+        *ngIf="submitted && (!job.skills || job.skills.length < 1)"
+        >Skills Are required.</small
+      >
+    </div>
+    <div class="field">
+      <label for="responsibilities">Responsibilities</label>
+      <br />
+      <small>
+        You Can Have Multiple Responsibilities Seprated By Comma ","</small
+      >
+      <p-chips [(ngModel)]="job.responsibilities" separator=","></p-chips>
+      <small
+        class="p-error"
+        *ngIf="
+          submitted &&
+          (!job.responsibilities || job.responsibilities.length < 1)
+        "
+        >Responsibilities Are required.</small
+      >
+    </div>
+    <div class="field">
+      <label for="validFrom">Valid From</label>
+      <p-calendar [(ngModel)]="job.validFrom"></p-calendar>
+      <small class="p-error" *ngIf="submitted && !job.validFrom"
+        >valid From is required.</small
+      >
+    </div>
+    <div class="field">
+      <label for="validTo">Valid To</label>
+      <p-calendar
+        [(ngModel)]="job.validTo"
+        [minDate]="job?.validTo"
+      ></p-calendar>
+      <small class="p-error" *ngIf="submitted && !job.validTo"
+        >Valid To is required.</small
+      >
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button
+      pButton
+      pRipple
+      *ngIf="!loading"
+      label="Cancel"
+      icon="pi pi-times"
+      class="p-button-text"
+      (click)="hideDialog()"
+    ></button>
+    <button
+      pButton
+      pRipple
+      *ngIf="!loading"
+      label="Save"
+      icon="pi pi-check"
+      class="p-button-text"
+      (click)="saveJob()"
+    ></button>
+    <button
+      pButton
+      pRipple
+      *ngIf="loading"
+      label="Loading.."
+      [disabled]="true"
+      class="p-button-text"
+    ></button>
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>

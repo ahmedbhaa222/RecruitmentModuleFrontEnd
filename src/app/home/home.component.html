@@ -1,0 +1,125 @@
+<p-toast></p-toast>
+
+<div class="card">
+  <p-dataView
+    #dv
+    [value]="jobs"
+    (onLazyLoad)="getData($event)"
+    [lazy]="true"
+    [loading]="loading"
+    [paginator]="false"
+    layout="list"
+  >
+    <ng-template pTemplate="header">
+      <div class="p-d-flex p-flex-column p-flex-md-row p-jc-md-between">
+        Jobs Available
+      </div>
+    </ng-template>
+    <ng-template let-job pTemplate="listItem">
+      <div class="col-12">
+        <div class="product-list-item">
+          <div class="product-list-detail">
+            <div class="product-name">{{ job.name }}</div>
+            <div class="product-description">{{ job.description }}</div>
+            <i class="pi pi-tag product-category-icon"></i
+            ><span class="product-category">{{ job.categoryName }}</span>
+          </div>
+          <div class="product-list-action">
+            <p-button
+              icon="pi pi-plus"
+              label="Apply"
+              (click)="openDialog(job)"
+            ></p-button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </p-dataView>
+</div>
+
+<p-dialog
+  [(visible)]="dialog"
+  [style]="{ width: '600px' }"
+  header="Application Details"
+  [modal]="true"
+  styleClass="p-fluid"
+>
+  <ng-template pTemplate="content">
+    <form [formGroup]="form">
+      <div class="field">
+        <label for="name">Name</label>
+        <input
+          type="text"
+          pInputText
+          id="name"
+          formControlName="name"
+          required
+          autofocus
+        />
+        <small class="p-error" *ngIf="submitted && form?.get('name').errors"
+          >Name is required.</small
+        >
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          pInputText
+          id="email"
+          formControlName="email"
+          required
+          autofocus
+        />
+        <small class="p-error" *ngIf="submitted && form?.get('email').errors"
+          >Email is required. & Email Must Be In A valid Email Format</small
+        >
+      </div>
+      <div class="field">
+        <label for="mobileNumber">MobileNumber</label>
+
+        <input
+          type="tel"
+          pInputText
+          id="mobileNumber"
+          formControlName="mobileNumber"
+          required
+          autofocus
+        />
+        <small
+          class="p-error"
+          *ngIf="submitted && form?.get('mobileNumber').errors"
+          >MobileNumber is required. & Phone Must Be 10 Digits and Only Numbers
+        </small>
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button
+      pButton
+      pRipple
+      *ngIf="!loading"
+      label="Cancel"
+      icon="pi pi-times"
+      class="p-button-text"
+      (click)="hideDialog()"
+    ></button>
+    <button
+      pButton
+      pRipple
+      *ngIf="!loading"
+      label="Save"
+      icon="pi pi-check"
+      class="p-button-text"
+      (click)="saveApplication()"
+    ></button>
+    <button
+      pButton
+      pRipple
+      *ngIf="loading"
+      label="Loading.."
+      [disabled]="true"
+      class="p-button-text"
+    ></button>
+  </ng-template>
+</p-dialog>
